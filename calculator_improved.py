@@ -7,38 +7,63 @@ class CalculatorEngine:
     """Safely evaluates arithmetic expressions from the calculator UI."""
 
     def evaluate(self, expression: str) -> float:
-        sanitized = expression.replace("×", "*").replace("÷", "/")
+        sanitized = expression.replace("×", "*").replace("÷", "/").strip()
+
         if not sanitized:
             raise ValueError("Nothing to calculate")
 
-        tree = ast.parse(sanitized, mode="eval")
-        return self._evaluate_node(tree.body)
+        try:
+            tree = ast.parse(sanitized, mode="eval")
+        except (SyntaxError, ValueError):
+            raise ValueError("Invalid expression") from None
+
+        result = self._evaluate_node(tree.body)
+
+        if not math.isfinite(result):
+            raise ValueError("Result is too large or invalid")
+
+        return result
 
     def _evaluate_node(self, node):
         if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
-            return float(node.value)
+            if isinstance(node.value, bool):
+                raise ValueError("Invalid number")
+            value = float(node.value)
+            if not math.isfinite(value):
+                raise ValueError("Invalid number")
+            return value
 
         if isinstance(node, ast.BinOp):
             left = self._evaluate_node(node.left)
             right = self._evaluate_node(node.right)
 
             if isinstance(node.op, ast.Add):
-                return left + right
-            if isinstance(node.op, ast.Sub):
-                return left - right
-            if isinstance(node.op, ast.Mult):
-                return left * right
-            if isinstance(node.op, ast.Div):
+                result = left + right
+            elif isinstance(node.op, ast.Sub):
+                result = left - right
+            elif isinstance(node.op, ast.Mult):
+                result = left * right
+            elif isinstance(node.op, ast.Div):
                 if right == 0:
                     raise ZeroDivisionError("Cannot divide by zero")
-                return left / right
+                result = left / right
+            else:
+                raise ValueError("Unsupported operator")
+
+            if not math.isfinite(result):
+                raise ValueError("Result is too large or invalid")
+
+            return result
 
         if isinstance(node, ast.UnaryOp):
             operand = self._evaluate_node(node.operand)
+
             if isinstance(node.op, ast.UAdd):
                 return +operand
             if isinstance(node.op, ast.USub):
                 return -operand
+
+            raise ValueError("Unsupported operator")
 
         raise ValueError("Unsupported expression")
 
@@ -155,6 +180,10 @@ class CalculatorApp:
             return
 
         if value == "%":
+            if not self.expression or self.expression[-1] in "+-*/":
+                self.display_var.set("Enter a number first")
+                return
+
             self.expression = self.expression + "/100"
             self.display_var.set(self.expression)
             return
@@ -192,14 +221,26 @@ class CalculatorApp:
     def _evaluate_expression(self) -> None:
         try:
             result = self.engine.evaluate(self.expression)
-            self.expression = str(result)
+
+            # Avoid displaying unnecessary trailing ".0" for whole numbers.
+            if result.is_integer():
+                self.expression = str(int(result))
+            else:
+                self.expression = str(result)
+
             self.display_var.set(self.expression)
+
         except ZeroDivisionError:
             self.expression = ""
             self.display_var.set("Cannot divide by zero")
-        except Exception:
+
+        except ValueError as error:
             self.expression = ""
-            self.display_var.set("Error")
+            self.display_var.set(str(error))
+
+        except OverflowError:
+            self.expression = ""
+            self.display_var.set("Number too large")
 
 
 def main() -> None:
