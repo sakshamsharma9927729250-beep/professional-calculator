@@ -204,3 +204,8 @@ See the [LICENSE](LICENSE) file for the complete license text.
 ## 📚 Documentation
 
 Detailed documentation is available in the [GitHub Wiki](../../wiki).
+
+## 🛡️ Error Handling
+
+NeuralCalc Pro handles invalid expressions and division-by-zero errors
+with user-friendly error messages instead of terminating the application.
