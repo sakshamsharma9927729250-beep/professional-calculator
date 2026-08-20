@@ -200,3 +200,7 @@ This project is intended for learning, development, and portfolio purposes.
 This project is licensed under the MIT License.
 
 See the [LICENSE](LICENSE) file for the complete license text.
+
+## 📚 Documentation
+
+Detailed documentation is available in the [GitHub Wiki](../../wiki).
