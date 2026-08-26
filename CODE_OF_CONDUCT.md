@@ -15,7 +15,7 @@ Examples of unacceptable behavior by participants include:
 - Personal attacks, insults, or demeaning comments
 
 ## Enforcement
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project maintainers at: [INSERT CONTACT EMAIL].
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project maintainers at: contact@sakshamsharma.dev
 
 All complaints will be reviewed and investigated and will result in a response that is deemed necessary and appropriate to the circumstances. Maintainers reserve the right to take action, including removal from the project, banning, or reporting to relevant authorities.
 
